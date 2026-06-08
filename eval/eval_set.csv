@@ -1,0 +1,5 @@
+raw,canonical_id,notes
+"Smith, J. (2020). Deep learning for citations. Journal of Examples.",smith_2020_citations,
+"J. Smith. 2020. Deep Learning for Citations. J Examples.",smith_2020_citations,
+"Wood, S. N. (2006). Generalized additive models: an introduction with R. Chapman and Hall.",wood_2006_gam,not same as Hastie 1990
+"Hastie, T. and Tibshirani, R. (1990). Generalized Additive Models. Chapman and Hall.",hastie_1990_gam,not same as Wood 2006

@@ -1,0 +1,13 @@
+pydantic>=2.5
+numpy>=1.24
+requests>=2.31
+anthropic>=0.40
+openai>=1.50
+titlecase>=2.4
+pymupdf>=1.24
+pyyaml>=6.0
+json-repair>=0.30
+# v3 additions
+gradio>=4.0
+pandas>=2.0
+python-dotenv>=1.0

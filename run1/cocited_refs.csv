@@ -1,0 +1,6 @@
+rank,cocitation_count,in_text_hits,global_citation_count,title,authors,year,venue,doi,canonical_id,citing_source_ids,confidence
+1,3,6,,Attention Is All You Need,Ashish Vaswani,2017,NeurIPS,10.48550/arxiv.1706.03762,stub0001abcd,W0000;W0001;W0002,0.95
+2,3,3,,BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,Jacob Devlin,2019,NAACL,10.48550/arxiv.1810.04805,stub0002efgh,W0000;W0001;W0002,0.95
+3,1,0,,Stub-only reference cited by paper 0,Author0,2020,,,stubpaper0000,W0000,1.00
+4,1,0,,Stub-only reference cited by paper 1,Author1,2021,,,stubpaper0001,W0001,1.00
+5,1,0,,Stub-only reference cited by paper 2,Author2,2022,,,stubpaper0002,W0002,1.00
