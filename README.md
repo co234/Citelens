@@ -3,7 +3,7 @@
 > **From a topic, an author, or a paper title — to the references that actually matter, ranked by how often the field cites them, with every citing passage traced back to its source.**
 
 <!-- Replace the placeholder links below with your actual URLs -->
-[🌐 Playground](http://8.141.116.119:7867) · [📄 Technical Explainer](./citation_cleaner_v4_explainer.pdf)
+[🌐 Playground](http://8.141.116.119:7867) · [📄 Technical Explainer](./citelens-citation_cleaner_v4_explainer.pdf)
 
 ---
 
