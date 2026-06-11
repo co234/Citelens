@@ -88,12 +88,15 @@ def make_canonical_id(
     return hashlib.sha1(key.encode()).hexdigest()[:12]
 
 
-def validate_extracted_batch(parsed: list[dict]) -> tuple[list[ExtractedReference], list[dict]]:
+def validate_extracted_batch(parsed: list) -> tuple[list[ExtractedReference], list[dict]]:
     valid: list[ExtractedReference] = []
     quarantined: list[dict] = []
     for item in parsed:
         try:
             valid.append(ExtractedReference.model_validate(item))
         except ValidationError as exc:
-            quarantined.append({**item, "_error": str(exc)})
+            if isinstance(item, dict):
+                quarantined.append({**item, "_error": str(exc)})
+            else:
+                quarantined.append({"raw": repr(item), "_error": str(exc)})
     return valid, quarantined

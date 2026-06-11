@@ -46,6 +46,17 @@ def _build_user_message(batch: list[dict]) -> str:
     return f"Parse the following {len(batch)} reference strings:\n\n{lines}\n\nReturn a JSON array of {len(batch)} objects."
 
 
+def _flatten_parsed_items(parsed: list) -> list:
+    """Expand nested lists the LLM occasionally returns as a single array element."""
+    flat: list = []
+    for item in parsed:
+        if isinstance(item, list):
+            flat.extend(item)
+        else:
+            flat.append(item)
+    return flat
+
+
 def _call_llm(batch: list[dict], client, model: str) -> list[dict]:
     resp = client.messages.create(
         model=model,
@@ -57,6 +68,7 @@ def _call_llm(batch: list[dict], client, model: str) -> list[dict]:
     parsed = parse_llm_json(resp.content[0].text)
     if not isinstance(parsed, list):
         raise ValueError(f"Expected JSON array, got {type(parsed).__name__}")
+    parsed = _flatten_parsed_items(parsed)
     if len(parsed) != len(batch):
         raise ValueError(f"LLM returned {len(parsed)} items for batch of {len(batch)}")
     return parsed
