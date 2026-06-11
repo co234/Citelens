@@ -5,8 +5,11 @@
 <!-- Replace the placeholder links below with your actual URLs -->
 [🌐 Playground](http://8.141.116.119:7867) · [📄 Technical Explainer](./citelens-citation_cleaner_v4_explainer.pdf)
 
----
+<a href="https://youtu.be/dwhjaUQTbLw">
+  <img src="./vedio.png" width="400">
+</a>
 
+---
 ## What it does
 
 Citelens is an LLM-powered citation intelligence agent. Give it a research topic, an author name, or a paper — it retrieves the most relevant papers in the corpus, reads who they cite, tallies every reference across the set, and returns a frequency-ranked, evidence-backed map of the conversation.
