@@ -1,24 +1,34 @@
-# Citation Cleaner
+# Citelens - Citation Cleaners
 
 > **From a topic, an author, or a paper title — to the references that actually matter, ranked by how often the field cites them, with every citing passage traced back to its source.**
 
 <!-- Replace the placeholder links below with your actual URLs -->
-[🌐 Product Page](#) · [📄 Technical Explainer](./citation_cleaner_v4_explainer.pdf) · [🚀 Web Demo](#)
+[🌐 Playground](http://8.141.116.119:7867) · [📄 Technical Explainer](./citelens-citation_cleaner_v4_explainer.pdf)
 
 ---
 
 ## What it does
 
-Citation Cleaner is an LLM-powered citation intelligence agent. Give it a research topic, an author name, or a paper — it retrieves the most relevant papers in the corpus, reads who they cite, tallies every reference across the set, and returns a frequency-ranked, evidence-backed map of the conversation.
+Citelens is an LLM-powered citation intelligence agent. Give it a research topic, an author name, or a paper — it retrieves the most relevant papers in the corpus, reads who they cite, tallies every reference across the set, and returns a frequency-ranked, evidence-backed map of the conversation.
 
 The headline output is a co-citation report where each entry shows not just how many papers cite it, but **exactly where**: the in-context passage, the page number, and the citing paper.
 
-```
-Attention Is All You Need (2017) — cited 9× across the top-10 set.
+Here's a real example from querying `diffusion models` — the paper *Diffusion Models Beat GANs on Image Synthesis* (2021, cited 2171×) was retrieved and processed, yielding 73 references, 135 citances, and 71 unique canonical works after deduplication:
 
-  • in Zhang et al., 2023, p. 4:  "…building on the estimator proposed by [A]…"
-  • in Okoye, 2022, p. 11:        "…we adopt the same blocking strategy as [A]…"
-  • …and 7 more citing passages, each linked to its page and source.
+```
+Denoising Diffusion Probabilistic Models (2020) — most-referenced in text, 10 in-text mentions.
+
+Analyzing and Improving the Image Quality of StyleGAN (2019)
+  Tero Karras; Samuli Laine et al.
+  Cited in 1 source paper(s); appears 6 time(s) in text.
+
+  In 2105.05233v4:
+  — p. 1 · marker [5, 28, 51]:  "…infinite high-quality synthetic images [5, 28, 51]
+                                  and highly diverse human speech and music…"
+  — p. 4 · marker [27, 28, 25]: "…some papers [27, 28, 25] compare against arbitrary
+                                  subsets of the training set…"
+  — p. 10 · marker [28]:        "StyleGAN2 [28]  3.84"
+  …and 3 more citing passages.
 ```
 
 ---
@@ -26,7 +36,7 @@ Attention Is All You Need (2017) — cited 9× across the top-10 set.
 ## Three input modes
 
 ```bash
-# 1. Terminology
+# 1. By topic
 python scripts/run_discover.py --query "diffusion models" --workdir ./run_dm
 python scripts/run_discover.py --query "diffusion models" --workdir ./run_dm --sort recency
 python scripts/run_discover.py --query "diffusion models" --workdir ./run_dm --sort citations
@@ -34,7 +44,7 @@ python scripts/run_discover.py --query "diffusion models" --workdir ./run_dm --s
 # 2. Upload a paper — topic is extracted automatically
 python scripts/run_discover.py --upload mypaper.pdf --workdir ./run_mp --sort citations
 
-# 3. Author — returns top-N most-cited papers for that author
+# 3. By author — returns top-N most-cited papers for that author
 python scripts/run_discover.py --author "Yann LeCun" --workdir ./run_lecun --n 5
 
 # Use an OpenAlex author ID for disambiguation
@@ -64,46 +74,48 @@ The LLM is the scalpel, not the hammer.
 
 ## Pipeline
 
-Eight stages turn a query (or a folder of PDFs, or a raw reference CSV) into a ranked, traceable citation report.
+Nine stages turn a query (or a folder of PDFs, or a raw reference CSV) into a ranked, traceable citation report.
 
 ```
 Input (query / PDF folder / CSV)
-  └─▶ Retrieval          rank corpus, keep top N
-       └─▶ Stage 0       PDF parse — split refs, scan citances        [PDF mode only]
+  └─▶ Retrieval      search OpenAlex, keep top N papers
+       └─▶ Stage 0   PDF parse — extract text, split refs, scan citances   [PDF mode only]
             └─▶ Stage 1  Pre-clean — regex, drop noise
-                 └─▶ Stage 2  Extract — LLM → typed records
-                      └─▶ Stage 3  Blocking — group by surname × year
-                           └─▶ Stage 4  Similarity — title embeddings
-                                └─▶ Stage 5  LLM judge — same / different / unsure
-                                     └─▶ Stage 6  Agent loop — Crossref + OpenAlex  [uncertain only]
-                                          └─▶ Frequency ranking → Report
+                 └─▶ Stage 2  Extract — LLM → typed records (batched)
+                      └─▶ Stage 3  Block — group by surname × year
+                           └─▶ Stage 4  Embed — title embeddings & clustering
+                                └─▶ Stage 5  Judge — LLM same/different verdict
+                                     └─▶ Stage 6  Resolve — agent + Crossref/OpenAlex  [uncertain only]
+                                          └─▶ Stage 7  Co-citation — cross-paper aggregation
+                                               └─▶ Enrich — global citation counts (top 30)
+                                                    └─▶ Report — ranking table + in-context appendix
 ```
 
-**CSV mode** starts at Stage 1. **PDF mode** adds Stage 0, which also produces the in-text citing passages that power the headline report.
+**CSV mode** starts at Stage 1. **PDF mode** adds Stage 0, which also produces the in-text citances that power the in-context appendix.
 
 ---
 
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_ORG/citation-cleaner.git
-cd citation-cleaner
+git clone https://github.com/YOUR_ORG/citelens.git
+cd citelens
 pip install -r requirements.txt
 ```
 
 **Requirements:** Python ≥ 3.9, plus the packages below.
 
 ```
-pydantic>=2.5      anthropic>=0.40    pymupdf>=1.24
-numpy>=1.24        openai>=1.50       gradio>=4.0
-requests>=2.31     titlecase>=2.4     pandas>=2.0
+pydantic>=2.5      pymupdf>=1.24      gradio>=4.0
+numpy>=1.24        titlecase>=2.4     pandas>=2.0
+requests>=2.31     json-repair>=0.30  python-dotenv>=1.0
 ```
 
-API keys (set in `.env` or environment):
+LLM and embedding calls go through **OpenRouter**. Set your key in `.env` or the web UI:
 
 ```bash
-ANTHROPIC_API_KEY=...   # required for Stage 2 / 5 LLM calls
-OPENAI_API_KEY=...      # optional — for embedding provider
+OPENROUTER_API_KEY=...        # required — chat model + embedding model
+CITATION_CLEANER_EMAIL=...    # optional — enables OpenAlex polite pool
 ```
 
 Check connectivity before a real run:
@@ -117,7 +129,7 @@ python scripts/check_api.py
 ## Quick start
 
 ```bash
-# Dry-run (no API calls) — smoke test the pipeline
+# Dry-run (no API calls) — smoke-test the full pipeline offline
 python scripts/run_pipeline.py --pdfs ./papers --workdir ./run_2026 --dry-run
 python scripts/run_pipeline.py --refs demo/raw_refs_sample.csv --workdir ./run_refs --dry-run
 
@@ -125,7 +137,7 @@ python scripts/run_pipeline.py --refs demo/raw_refs_sample.csv --workdir ./run_r
 python scripts/run_discover.py --query "conformal prediction" --workdir ./run_cp
 ```
 
-**Web UI** (three tabs: Terminology / Upload paper / Author):
+**Web UI** — three tabs: By topic / Upload paper / By author:
 
 ```bash
 python scripts/web_app.py
@@ -151,7 +163,7 @@ Each run writes to `--workdir`:
 | `citances.jsonl` | Page-level in-text citation contexts (PDF mode) |
 | `resolved.jsonl` | Full cluster resolution log |
 
-The markdown report has two sections. The first is the co-citation ranking table (columns: `Rank`, `Co-cited`, `Global cites`, `In-text hits`, `Title`, `Authors`, `Year`, `DOI`). The second is the in-context appearances appendix — for each top-10 co-cited work, every occurrence in every source paper, with page number, citation marker, and context sentence.
+The markdown report has two sections. The ranking table leads with `Co-cited` (how many source papers include it) and `In-text hits` (how many times it appears in body text across all source papers) — the two numbers often diverge, and both matter. The in-context appendix then lists every occurrence of each top-10 work: page number, citation marker, and surrounding sentence.
 
 ---
 
@@ -161,7 +173,7 @@ The markdown report has two sections. The first is the co-citation ranking table
 from pathlib import Path
 from citation_cleaner.pipelines.discover_pipeline import run_discovery
 
-# Terminology, sorted by recency
+# By topic, sorted by recency
 result = run_discovery(
     query="diffusion models",
     workdir=Path("./run"),
@@ -169,7 +181,7 @@ result = run_discovery(
     sort_by="recency",
 )
 
-# Author mode
+# By author
 result = run_discovery(
     author="Yann LeCun",
     workdir=Path("./run_lecun"),
@@ -178,7 +190,7 @@ result = run_discovery(
 print(result["mode"])    # "author"
 print(result["author"])  # {'author_id': ..., 'display_name': ..., ...}
 
-# In-context occurrences
+# Access in-context occurrences
 for rec in result["records"][:3]:
     print(rec.title, "—", len(rec.occurrences), "in-text mentions")
     for occ in rec.occurrences:
@@ -240,17 +252,6 @@ Smoke tests for v4 features:
 python scripts/run_discover.py --author "Yann LeCun" --workdir /tmp/smoke_au --dry-run --no-enrich
 python scripts/run_discover.py --query "transformers" --workdir /tmp/smoke_sort --dry-run --no-enrich --sort recency
 ```
-
----
-
-## Changelog
-
-| Version | What's new |
-|---|---|
-| **v4** | Author input mode · `--sort` option · In-context appearances appendix in report |
-| **v3** | Discovery pipeline (OpenAlex retrieval) · Web UI · Co-citation aggregation |
-| **v2** | Importable typed package · PDF ingestion (Stage 0) · Pydantic schema layer · Resume behavior · Full test suite |
-| **v1** | Script-oriented prototype · Raw reference string input only |
 
 ---
 
