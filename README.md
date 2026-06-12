@@ -6,7 +6,7 @@
 [🌐 Playground](http://8.141.116.119:7867) · [📄 Technical Explainer](./citelens-citation_cleaner_v4_explainer.pdf)
 
 <a href="https://youtu.be/dwhjaUQTbLw">
-  <img src="./vedio.png" width="400">
+  <img src="./video.png" width="400">
 </a>
 
 ---
